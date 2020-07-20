@@ -1,0 +1,332 @@
+% !TEX program = lualatex
+% !TEX options = --shell-escape
+
+\documentclass[prettycode,jlmin,shellescape]{watsonbook}
+
+\HideEnvironment{solution}
+
+\begin{document} 
+
+\pagecolor{white} 
+
+\newpage
+
+\chapter*{Preface} \thispagestyle{empty}
+
+In this book, we develop the mathematical ideas underlying the modern
+practice of data science. The goal is to do so accessibly and with a
+minimum of prerequisites.* \sidenote{* Experience with basic calculus
+  is necessary, and some prior experience with linear algebra and
+  programming will be helpful.} For example, we will start by
+reviewing sets and functions from a data-oriented perspective. On the
+other hand, we will take a problem-solving approach to the material
+and will not shy away from challenging concepts. To get the most out
+of the course, you should prepare to invest a substantial amount of
+time on the exercises.
+
+This text was originally written to accompany the master's course DATA
+1010 at Brown University. The content of this PDF, along with hints
+and solutions for the exercises in this book, will be available on the
+edX platform starting in the fall semester of 2019, thanks to the
+BrownX project and the Brown University School of Professional
+Studies.
+
+The author would like to acknowledge Isaac Solomon, Elvis Nunez, and
+Thabo Samakhoana for their contributions during the development of the
+DATA 1010 curriculum. They wrote some of the exercises and many of the
+solutions that appear in the BrownX course.
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\chapter{Programming in Julia} \label{ch:programming-in-julia} 
+
+In this course, we will develop mathematical ideas in concert with corresponding computational skills. This relationship is symbiotic: writing programs is an important ingredient for applying mathematical ideas to real-world problems, but it also helps us explore and visualize math ideas in ways that go beyond what we could achieve with pen, paper, and imagination.
+
+We will use \textit{Julia}. This is a relatively new entrant to the
+scientific computing scene, having been introduced publicly in 2012
+and reaching its first stable release in August of 2018. Julia is
+ideally suited to the purposes of this course:
+\begin{enumerate}
+\item \textbf{Julia is designed for scientific computing}. The way
+  that code is written in Julia is influenced heavily by its primary
+  intended application as a scientific computing environment. This
+  means that our code will be succinct and will often look very
+  similar to the corresponding math notation. 
+\item \textbf{Julia has benefits as an instructional language}. Julia
+  provides tools for inspecting how numbers and other data structures
+  are stored internally, and it also makes it easy to see how the
+  built-in functions work. 
+\item \textbf{Julia is simple yet fast}. Hand-coded algorithms are
+  generally much faster in Julia than in other user-friendly languages
+  like Python or R. This is not always important in practice, because
+  you can usually use fast code written by other people for the most
+  performance-sensitive parts of your program. But when you're
+  learning fundamental ideas, it's very helpful to be able to write
+  out simple algorithms by hand and examine their behavior on large or
+  small inputs. 
+\item \textbf{Julia is integrated in the broader ecosystem}. Julia has
+  excellent tools for interfacing with other languages like C, C++,
+  Python, and R, so can take advantage of the mountain of scientific
+  computing resources developed over the last several
+  decades. (Conversely, if you're working in a Python or R environment
+  in the future, you can write some Julia code and integrate it into
+  your Python or R program).
+\end{enumerate}
+
+\section{Environment and workflow}
+
+There are four ways of interacting with Julia: 
+  \begin{enumerate}
+  \item \textit{REPL}. Launch a read-eval-print loop from the
+    command line. Any code you enter will be executed immediately,
+    and any values returned by your code will be displayed. 
+  \item \textit{Script}. Save your code in a file called
+    \texttt{example.jl}, and run \jlverb{julia example.jl} the
+    command line to execute all the code in the file.
+  \item \textit{Notebook}. Like a REPL, but allows inserting text and
+    math expressions for explanation, grouping code into blocks,
+    multimedia output, and other features. The main notebook app is
+    called \textbf{Jupyter}, and it supports Julia, Python, R and many
+    other languages.
+  \item \textit{IDE}. An integrated development environment is a
+    program for editing your scripts which provides various
+    code-aware conveniences (like autocompletion, highlighting, and
+    many others). \textbf{Juno} is an IDE for Julia. 
+  \end{enumerate}
+
+  Some important tips for getting help as you learn:
+
+  \begin{enumerate}
+  \item Julia's official documentation is available at
+    \url{https://docs.julialang.org} and is excellent. The learning
+    experience you will get in this chapter is intended to get you up
+    and running with the ideas we will use in this course, but if you
+    do want to learn the language more extensively, I recommend
+    investigating the resources linked on the official Julia learning
+    page: \url{https://julialang.org/learning/}
+  \item You can get help within a Julia session by typing a question
+    mark before the name of a function whose documentation you want to
+    see. 
+  \item Similarly, \jlverb{apropos("eigenvalue")} returns a list
+    of functions whose documentation mentions "eigenvalue"
+  \end{enumerate}
+
+  \begin{exercise}{}{julia-install}
+   Install Julia 1.0 on your system, start a command-line session
+    by running \jlverb{julia} from a terminal or command prompt,
+    What does the ASCII-art banner look like (the one that pops up
+    when you start a command line session)? 
+  \end{exercise}
+
+  \begin{solution}
+    It looks like this: 
+    \begin{textblock}[title=]
+                   _
+       _       _ _(_)_     |  Documentation: https://docs.julialang.org
+      (_)     | (_) (_)    |
+       _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+      | | | | | | |/ _` |  |
+      | | |_| | | | (_| |  |  Version 1.0.3 (2018-12-18)
+     _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+    |__/                   |
+    \end{textblock}
+\end{solution}
+  
+  \section{Fundamentals}
+
+  We begin by developing some basic vocabulary for the elements of a
+  program.
+  
+\subsection{Variables and values}
+
+A \textbf{value} is a fundamental entity that may be manipulated by a
+program. Values have \textbf{types}; for example, \jlverb{5} is
+an \jlverb{Int} and \jlverb{"Hello world!"} is a
+\jlverb{String}. Types are important for the computer to keep track
+of, since values are stored differently depending on their type. You
+can check the type of a value using the \jlverb{typeof} function:
+\jlverb{typeof("hello")} returns \jlverb{String}. 
+
+A \textbf{variable} is a name used to refer to a value. We can
+\textbf{assign} a value (say \jlverb{41}) to a variable (say
+\jlverb{age}) as follows:
+\begin{juliablock}[title=]
+  age = 41 
+\end{juliablock}
+
+A \textbf{function} performs a particular task. For example,
+\jlverb{print(x)} writes a string representation of the value
+of the variable \jlverb{x} to the screen.  Prompting a
+function to perform its task is referred to as \textbf{calling}
+the function. Functions are called using parentheses following the
+function's name, and values needed by the function are supplied
+between these parentheses.
+
+An \textbf{operator} is a special kind of function that can be
+called in a special way. For example, the multiplication operator
+\jlverb{*} is called using the mathematically familiar
+\textit{infix notation} \jlverb{3 * 5}, or
+\jlverb{*(3,5)}.
+
+A \textbf{statement} is an instruction to be executed. For
+example, the assignment \jlverb{age = 41} is a statement.  An
+\textbf{expression} is a combination of values, variables,
+operators, and function calls that a language interprets and
+\textbf{evaluates} to a value. For example,
+\jlverb{1 + age + abs(3*-4)} is an expression which
+evaluates* \sidenote{\texttt{abs} is the absolute value function}
+to \jlverb{54}.
+
+A sequence of statements or expressions can be collected into a
+\textbf{block}, delimited by \jlverb{begin} and
+\jlverb{end}. The statements and expressions in a block are
+executed sequentially. If the block concludes with an expression,
+then the block returns the value of that expression. For example,
+\begin{juliablock}[title=]
+  begin
+      y = x+1
+      y^2
+  end
+\end{juliablock}
+is equivalent to the expression \jlverb{(x+1)^2}.
+
+The \textbf{keywords} of a language are the words that have
+special meaning and cannot be used for other purposes. For
+example, \jlverb{begin} and \jlverb{end} are keywords in
+Julia.
+
+\begin{exercise}{}{substitution-block}
+  What value does the following expression evaluate to? What is the
+  type of the resulting value? Explain. 
+  \begin{juliablock}[title=]
+    begin
+        x = 14
+        x = x / 2
+        y = x + 1
+        y = y + x
+        2y + 1
+    end
+  \end{juliablock}
+  \hint{Walk through the substitutions one at a time, starting from
+    the top.}
+\end{exercise}
+
+\begin{solution}
+  This expression returns the \jlverb{Float64} value
+  \jlverb{31.0}. In the second line, the value associated with
+  the variable \jlverb{x} is changed to \jlverb{7.0},
+  because dividing integers returns a float in Julia. In the third
+  line, the value 8 is stored in the variable \jlverb{y}, and in
+  the next-to-last line, that value is replaced with
+  \jlverb{15.0}. Finally, the last line evaluates to
+  \jlverb{31.0}, and the whole block evaluates to the value of
+  the final expression. 
+\end{solution}
+
+\subsection{Basic data types}
+
+Julia, like most programming environments, has built-in types for
+handling common data like numbers and text.
+
+\begin{enumerate}
+\item Numbers.
+  \begin{enumerate}
+  \item A numerical value can be either an \textbf{integer} or a
+    \textbf{float}. The most commonly used integer and floating point
+    types are \jlverb{Int64} and \jlverb{Float64}, so named
+    because they are stored using 64 bits. We can represent integers
+    exactly, while storing a real number as a float often requires
+    slightly rounding it (see the \textit{Numerical
+      Computation} chapter for details). A number is stored as a float or
+    integer according to whether it contains a decimal point, so if
+    you want the value 6 to be stored as a float, you should write it
+    as \jlverb{6.0}.
+  \item Basic arithmetic follows order of operations: 
+    \jlverb{1 + 3*5*(-1 + 2)} evaluates to \jlverb{16}. 
+  \item The exponentiation operator is \jlverb{^}. 
+  \item Values can be compared using the operators* \sidenote{* For
+      the last two symbols, use \texttt{\textbackslash le«tab»} and
+      \texttt{\textbackslash ge«tab»}}[-10mm]
+    \jlverb{==,>,<,≤,≥}.
+  \item Julia integers will overflow unless you make them big${}^\dagger$
+    \sidenote{${}^\dagger$ Operations with big-type numbers are much slower
+      than operations with usual ints and floats}, so
+    \jlverb{big(2)^100} works, but \jlverb{2^100}
+    evaluates to \jlverb{0}. 
+  \end{enumerate}
+\item Strings
+  \begin{enumerate}
+  \item Textual data is represented in a \textbf{string}. We can
+    create a string value by enclosing the desired string in quotation
+    marks: \jlverb{a = "this is a string"}. 
+  \item We can find the number of characters in a string with the
+    \jlverb{length} function: \jlverb{length("hello")}
+    returns \jlverb{5}. 
+  \item We can combine two strings with the asterisk operator (\jlverb{*}):
+    \jlverb{"Hello " * "World"}
+  \item We can insert the value of a variable into a string using
+    \textit{string interpolation}:
+    \begin{juliablock}[title=]
+      x = 4.2
+      print("The value of x is $x")
+    \end{juliablock}
+    % $ <- DELETE THIS
+  \end{enumerate}
+\item Booleans
+  \begin{enumerate}
+  \item A \textbf{boolean} is a special data type which is either 
+    \jlverb{true} or \jlverb{false}
+  \item The basic operators that can be used to combine boolean values
+    are  
+    \begin{center} 
+      \renewcommand{\arraystretch}{1.2}
+      \begin{tabular}{c|c}
+        and & \jlverb{&&} \\
+        or & \jlverb{||} \\
+        not & \jlverb{!} 
+      \end{tabular}
+    \end{center}
+  \end{enumerate}
+\end{enumerate}
+
+\begin{exercise}{}{quick-brown-fox}
+  \begin{enumerate}[(i)]
+  \item Write a Julia expression which computes
+    $\frac{1}{a+\frac{2}{3}}$ where $a$ is equal to the number of
+    characters in the string
+    \jlverb{"The quick brown fox jumped over the lazy dog"}
+  \item Does Julia convert types when doing equality comparison? In
+    other words, does \jlverb{1 == 1.0} return \jlverb{true}
+    or \jlverb{false}? 
+  \end{enumerate}
+  \hint{(i) Use the \jlverb{length} function, (ii) try it out.}
+\end{exercise}
+
+\begin{solution}
+  \begin{enumerate}[(i)]
+  \item We store the length of the given string in a variable
+    \jlverb{a} and evaluate the given expression as follows: 
+    \begin{juliablock}[title=]
+      a = length("The quick brown fox jumped over the lazy dog")
+      1/(a+2/3)
+    \end{juliablock}
+  \item Yes, Julia does convert types for equality comparison. So
+    \jlverb{1 == 1.0} returns \jlverb{true}. 
+  \end{enumerate}
+\end{solution}
+
+Here's an example showing how to incorporate Julia output into your document: 
+
+\begin{juliablockc}[title=][]
+   a = 2
+\end{juliablockc}
+ 
+The value of \jlverb{a^200} is \jl{a^200}, but the value of \jlverb{big(a)^200} is 
+
+$$\jl{big(a)^200}.$$
+
+\end{document}
